@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { IProduct } from './product';
+import { isPromise } from 'q';
 
 @Component({
     selector: 'pm-products',
-    templateUrl: './product-list.component.html'
+    templateUrl: './product-list.component.html',
+    styleUrls: ['./product-list.component.css'],
 })
 
 export class ProductListComponent {
@@ -11,7 +13,15 @@ export class ProductListComponent {
     imageWidth: number = 50;
     imageMargin: number = 2;
     showImage: boolean = false;
-    listFilter: string = 'cart';
+    _listFilter: string;
+    get listFilter(): string {
+        return this._listFilter;
+    }
+    set listFilter(value: string) {
+        this._listFilter = value;
+        this.filteredProdcuts = this.listFilter ? this.performFilter(this.listFilter) : this.products;
+    }
+    filteredProdcuts: IProduct[];
     products: IProduct[] = [
         {
             "productId": 1,
@@ -35,7 +45,18 @@ export class ProductListComponent {
         }
     ];
 
+    constructor() {
+        this.listFilter = 'cart';
+        this.filteredProdcuts = this.products;
+    }
+
     toggleImage(): void {
         this.showImage = !this.showImage;
+    }
+
+    performFilter(filterBy: string): IProduct[] {
+        filterBy = filterBy.toLocaleLowerCase();
+        return this.products.filter((product: IProduct) =>
+            product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1);
     }
 }
